@@ -9,97 +9,87 @@
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chewy&family=Patrick+Hand&family=Fraunces:ital,opsz,wght@0,9..144,300..700;1,9..144,300..700&display=swap">
 <style>
-/* Layout: an open picture book lying on a desk, folded down the middle. Words on the left
-   page, Grady on the right; the right-hand leaf turns over the fold. (On a phone there is
-   room for one page, so the picture sits above the words.) The pages are always printed
-   paper; only the desk follows the theme. The type grows up as the book does. */
+/* Layout: an open picture book that fills the whole window, folded down the middle. Words
+   on the left page, Grady on the right; the right-hand leaf turns over the fold, and the
+   controls sit on the pages like a folio line. Type and pictures scale with the window.
+   (On a phone held upright there is room for one page, so the picture sits above the words.) The pages
+   are always printed paper; only the desk behind the closed cover follows the theme. */
 :root{
   --desk:#E4DCF7; --desk-2:#D3C7F0;
-  --ui-ink:#231C38; --ui-muted:#675F80;
-  --btn:#231C38; --btn-ink:#FFFDF5;
-  --shadow:rgba(40,20,90,.35);
   --paper:#FBF6E8; --paper-edge:#E2D7BC;
   /* printed colours: the same in both themes */
   --ink:#231B15; --ink-soft:#6F6453;
-  --c-red:#D9352B; --c-blue:#2767C4; --c-green:#2E8B47; --c-orange:#E8761A;
+  --c-red:#D9352B; --c-blue:#2767C4; --c-green:#2E8B47; --c-orange:#E8761A; --c-rust:#A84C08;
   --cover:#F6C12B; --gold:#E9B63A; --gold-deep:#B98516;
   --f-shout:'Chewy','Arial Rounded MT Bold','Trebuchet MS',system-ui,sans-serif;
   --f-kid:'Patrick Hand','Comic Sans MS','Chalkboard SE',cursive;
   --f-grown:'Fraunces',Georgia,'Times New Roman',serif;
+  --bar:clamp(40px,8vh,60px);      /* room kept at the foot of each page for the controls */
   --grain:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .38  0 0 0 0 .3  0 0 0 0 .18  0 0 0 .11 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
 }
 @media (prefers-color-scheme: dark){
   :root:not([data-theme="light"]){
     --desk:#0F0C1A; --desk-2:#1B1530;
-    --ui-ink:#F2ECFF; --ui-muted:#A79FC4;
-    --btn:#F2ECFF; --btn-ink:#1B1530;
-    --shadow:rgba(0,0,0,.65);
     --paper:#F3EBD7; --paper-edge:#CFC3A4;
     color-scheme:dark;
   }
 }
 :root[data-theme="dark"]{
   --desk:#0F0C1A; --desk-2:#1B1530;
-  --ui-ink:#F2ECFF; --ui-muted:#A79FC4;
-  --btn:#F2ECFF; --btn-ink:#1B1530;
-  --shadow:rgba(0,0,0,.65);
   --paper:#F3EBD7; --paper-edge:#CFC3A4;
   color-scheme:dark;
 }
 
 *{box-sizing:border-box}
 [hidden]{display:none!important}
+html,body{height:100%}
 body{
   margin:0;
   background:radial-gradient(120% 80% at 50% 0%,var(--desk-2),var(--desk) 60%) var(--desk);
-  color:var(--ui-ink);
+  color:var(--ink);
   font-family:var(--f-grown);
   font-size:16px;
-  padding-left:max(16px,env(safe-area-inset-left,0px));
-  padding-right:max(16px,env(safe-area-inset-right,0px));
-  padding-block:clamp(16px,4vh,44px);
   overflow-x:clip;
 }
-.stage{max-width:1080px;margin-inline:auto;display:flex;flex-direction:column;gap:18px}
+.stage{position:relative;height:100%;overflow:hidden}
 .defs{position:absolute;width:0;height:0}
 
 /* ---------- the book ---------- */
-.book{display:grid;position:relative;transition:transform .7s cubic-bezier(.4,0,.2,1)}
+.book{display:grid;height:100%;position:relative;transition:transform .7s cubic-bezier(.4,0,.2,1)}
 .book.closed{transform:translateX(-25%)}          /* a closed book sits in the middle of the desk */
 .book.shake{animation:shake .4s ease}
 @keyframes shake{20%{translate:7px 0}45%{translate:-6px 0}70%{translate:4px 0}}
-.spread{grid-area:1/1;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);min-height:clamp(440px,64vh,600px)}
+.spread{grid-area:1/1;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);min-height:0}
 .leaf{
-  position:relative;z-index:1;min-width:0;display:flex;flex-direction:column;
-  container-type:inline-size;
+  position:relative;z-index:1;min-width:0;min-height:0;display:flex;flex-direction:column;
+  container-type:size;
   color:var(--ink);
   background:var(--grain),var(--fold),radial-gradient(130% 100% at 50% 40%,transparent 55%,rgba(140,105,40,.12)),var(--paper);
-  box-shadow:0 22px 44px -22px var(--shadow),0 2px 0 var(--paper-edge),0 4px 0 -1px var(--paper-edge);
   overflow:hidden;
   backface-visibility:hidden;-webkit-backface-visibility:hidden;
 }
-.lp{--fold:linear-gradient(to left,rgba(70,45,10,.32),rgba(70,45,10,.10) 3.5%,transparent 15%);border-radius:10px 0 0 10px;transform-origin:right center}
-.rp{--fold:linear-gradient(to right,rgba(70,45,10,.32),rgba(70,45,10,.10) 3.5%,transparent 15%);border-radius:0 10px 10px 0;transform-origin:left center}
+.lp{--fold:linear-gradient(to left,rgba(70,45,10,.32),rgba(70,45,10,.10) 3.5%,transparent 15%);transform-origin:right center;padding-left:env(safe-area-inset-left,0px)}
+.rp{--fold:linear-gradient(to right,rgba(70,45,10,.32),rgba(70,45,10,.10) 3.5%,transparent 15%);transform-origin:left center;padding-right:env(safe-area-inset-right,0px)}
 .lp.blank{visibility:hidden}
 /* the closed book: one board, a foil spine of little loops down its left edge */
-.cover .rp{--fold:linear-gradient(transparent,transparent);border-radius:5px 12px 12px 5px;padding-left:22px}
+.cover .rp{--fold:linear-gradient(transparent,transparent);padding-left:22px;box-shadow:0 0 60px -10px rgba(0,0,0,.55)}
 .cover .rp::before{
   content:"";position:absolute;inset:0 auto 0 0;width:22px;z-index:4;
   background:
     url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='22' height='24' viewBox='0 0 22 24'%3E%3Cpath d='M15.5 9.5a5 5 0 1 0 .6 5' fill='none' stroke='%23B98516' stroke-width='1.6' stroke-linecap='round'/%3E%3Cpath d='M13 8.2l3 1.6 1.2-3.2' fill='none' stroke='%23B98516' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") 0 0/22px 24px,
     linear-gradient(90deg,var(--gold-deep),var(--gold) 28%,var(--gold) 72%,var(--gold-deep));
 }
-.cover .rp::after{content:"";position:absolute;inset:0 0 0 22px;border:12px solid var(--cover);border-radius:0 12px 12px 0;pointer-events:none;z-index:3}
+.cover .rp::after{content:"";position:absolute;inset:0 0 0 22px;border:12px solid var(--cover);pointer-events:none;z-index:3}
 
 /* turning a leaf over the fold: the right page lifts, and the next left page comes down on its back */
 .leaf.fo{z-index:3;animation:rpOut var(--flip,700ms) cubic-bezier(.45,.05,.55,.95) forwards,shade var(--flip,700ms) linear}
 .leaf.fi{z-index:3;animation:lpIn var(--flip,700ms) cubic-bezier(.45,.05,.55,.95) both,shade var(--flip,700ms) linear}
 .leaf.bo{z-index:3;animation:lpOut var(--flip,560ms) cubic-bezier(.45,.05,.55,.95) forwards,shade var(--flip,560ms) linear}
 .leaf.bi{z-index:3;animation:rpIn var(--flip,560ms) cubic-bezier(.45,.05,.55,.95) both,shade var(--flip,560ms) linear}
-@keyframes rpOut{from{transform:perspective(2600px) rotateY(0deg)}to{transform:perspective(2600px) rotateY(-180deg)}}
-@keyframes lpIn{from{transform:perspective(2600px) rotateY(180deg)}to{transform:perspective(2600px) rotateY(0deg)}}
-@keyframes lpOut{from{transform:perspective(2600px) rotateY(0deg)}to{transform:perspective(2600px) rotateY(180deg)}}
-@keyframes rpIn{from{transform:perspective(2600px) rotateY(-180deg)}to{transform:perspective(2600px) rotateY(0deg)}}
+@keyframes rpOut{from{transform:perspective(3200px) rotateY(0deg)}to{transform:perspective(3200px) rotateY(-180deg)}}
+@keyframes lpIn{from{transform:perspective(3200px) rotateY(180deg)}to{transform:perspective(3200px) rotateY(0deg)}}
+@keyframes lpOut{from{transform:perspective(3200px) rotateY(0deg)}to{transform:perspective(3200px) rotateY(180deg)}}
+@keyframes rpIn{from{transform:perspective(3200px) rotateY(-180deg)}to{transform:perspective(3200px) rotateY(0deg)}}
 @keyframes shade{50%{filter:brightness(.74)}}
 /* phone: the whole page turns from its left edge */
 .spread.mo{position:relative;z-index:5;transform-origin:left center;animation:turnOut var(--flip,650ms) cubic-bezier(.5,.05,.8,.45) forwards}
@@ -107,17 +97,19 @@ body{
 @keyframes turnOut{to{transform:perspective(2400px) rotateY(-94deg);filter:brightness(.72)}}
 @keyframes turnIn{from{transform:perspective(2400px) rotateY(-94deg);filter:brightness(.72)}}
 
-/* ---------- words ---------- */
+/* ---------- words: sized from the page, by whichever of its width or height is tighter ---------- */
 .words{
-  flex:1;min-width:0;position:relative;z-index:2;
-  display:flex;flex-direction:column;justify-content:center;gap:.8em;
-  padding:clamp(20px,8.5cqi,46px);
+  flex:1;min-width:0;min-height:0;position:relative;z-index:2;
+  display:flex;flex-direction:column;justify-content:safe center;gap:.8em;
+  padding:clamp(20px,8.5cqi,90px);padding-bottom:calc(var(--bar) + 6px);
+  overflow-y:auto;
 }
 .words p{margin:0;text-wrap:pretty}
-.voice-1 .words{font-family:var(--f-kid);font-size:clamp(1.05rem,4.6cqi,1.72rem);line-height:1.28}
-.voice-2 .words{font-family:var(--f-kid);font-size:clamp(1rem,4.2cqi,1.52rem);line-height:1.3}
-.voice-3 .words{font-family:var(--f-grown);font-weight:500;font-size:clamp(.95rem,3.55cqi,1.28rem);line-height:1.45}
-.voice-4 .words{font-family:var(--f-grown);font-weight:400;font-size:clamp(.95rem,3.4cqi,1.22rem);line-height:1.58}
+.voice-1 .words{font-family:var(--f-kid);font-size:min(4.6cqi,5.2cqh);line-height:1.28}
+.voice-2 .words{font-family:var(--f-kid);font-size:min(4.2cqi,4.4cqh);line-height:1.3}
+.voice-3 .words{font-family:var(--f-grown);font-weight:500;font-size:min(3.55cqi,3.25cqh);line-height:1.45}
+.voice-4 .words{font-family:var(--f-grown);font-weight:400;font-size:min(3.4cqi,2.95cqh);line-height:1.58}
+.coinpage .words{font-size:min(3.4cqi,2.62cqh);gap:.7em}
 
 /* hand-lettered display words: fat marker fill inside a wobbly ink outline */
 .shout,.cover h1 span{
@@ -132,14 +124,13 @@ body{
 .shout.c1{color:var(--c-blue);transform:rotate(1.5deg)}
 .shout.c2{color:var(--c-orange);transform:rotate(-1deg)}
 .shout.c3{color:var(--c-green);transform:rotate(2deg)}
-.shout.fit{font-size:min(1.55em,8.3cqi)}
-.shout.huge{display:block;font-size:clamp(1.7rem,11.2cqi,3.3rem);transform:rotate(-2.5deg);transform-origin:left center}
+.shout.huge{display:block;font-size:2.5em;transform:rotate(-2.5deg);transform-origin:left center}
 .voice-3 .shout{font-size:1.32em}
 .term{font-family:var(--f-grown);font-style:italic;font-weight:500;font-size:.84em}
 .aside{font-family:var(--f-kid);color:var(--ink-soft);align-self:flex-end;transform:rotate(-1.5deg);font-size:1.02em}
 .oh{font-size:2.6em;font-weight:300;font-style:italic;line-height:1}
 .fin{font-variant-caps:all-small-caps;letter-spacing:.22em;color:var(--ink-soft);font-size:.95em;padding-top:.4em}
-.bignum{font-family:var(--f-grown);font-weight:300;font-size:clamp(1.6rem,11.4cqi,4.4rem);line-height:1;font-variant-numeric:tabular-nums;letter-spacing:-.02em}
+.bignum{font-family:var(--f-grown);font-weight:300;font-size:3.3em;line-height:1;font-variant-numeric:tabular-nums;letter-spacing:-.02em}
 .bignum small{display:block;font-size:.26em;letter-spacing:.14em;font-variant-caps:all-small-caps;color:var(--ink-soft);padding-bottom:.5em}
 .cite{font-size:.72em;line-height:1.45;color:var(--ink-soft);border-top:1px solid var(--paper-edge);padding-top:.7em}
 .cite a{color:inherit;text-underline-offset:.18em}
@@ -148,26 +139,26 @@ body{
 .tails-word{font-size:1.9em;font-weight:300;font-style:italic;line-height:1}
 
 /* cover */
-.cover .words{flex:none;justify-content:flex-start;gap:.3em;padding:clamp(26px,9cqi,44px) clamp(26px,9cqi,44px) 0}
+.cover .words{flex:none;justify-content:flex-start;gap:.3em;overflow:visible;font-size:min(4.4cqi,3.3cqh);padding:1.9em 1.9em 0}
 .eyebrow{font-family:var(--f-grown);font-style:italic;font-weight:500;font-size:.72em;letter-spacing:.02em}
-.cover h1{font-size:clamp(1.3rem,6.6cqi,2.1rem);line-height:1.08;margin:0;font-weight:400}
+.cover h1{font-size:1.45em;line-height:1.08;margin:0;font-weight:400}
 .cover h1 span{display:inline-block;letter-spacing:.03em}
-.cover .t-big{display:block;font-size:clamp(1.6rem,9.6cqi,3.1rem);transform:rotate(-2.5deg);transform-origin:left center;margin-block:.1em .14em}
+.cover .t-big{display:block;font-size:1.46em;transform:rotate(-2.5deg);transform-origin:left center;margin-block:.1em .14em}
 .c-red{color:var(--c-red)} .c-blue{color:var(--c-blue)} .c-green{color:var(--c-green)} .c-orange{color:var(--c-orange)}
 .starring{font-size:.84em}
 .starring b{font-family:var(--f-shout);font-weight:400;font-size:1.2em;letter-spacing:.03em;color:#7B3FC4}
 
-/* ---------- pictures ---------- */
-.art{flex:1;position:relative;display:grid;place-items:center;min-width:0;padding:clamp(8px,4.4cqi,22px)}
-.scene{position:relative;z-index:1;width:100%;max-width:470px;aspect-ratio:1/1}
-.cover .art{padding-top:0}
-.cover .scene{max-width:min(100%,330px)}
+/* ---------- pictures: a square scene, as big as the page allows ---------- */
+.art{flex:1;min-width:0;min-height:0;position:relative;display:grid;place-items:center;container-type:size;padding:clamp(8px,3cqi,40px);padding-bottom:var(--bar)}
+.scene{position:relative;z-index:1;width:min(100cqw,100cqh);aspect-ratio:1/1}
+.cover .art{padding-top:0;padding-bottom:calc(var(--bar) + 26px)}
 .scene.clip{overflow:hidden}
 .scene img,.tile img{position:absolute;height:auto;max-width:none;user-select:none;-webkit-user-drag:none}
 .scene svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
 .backdrop{position:absolute;inset:0 0 0 22%}
 .tile{position:absolute;width:50%;height:50%;overflow:hidden}
 .tile img{width:200%;height:200%;object-fit:cover}
+.tile.edge{-webkit-mask-image:linear-gradient(to right,transparent 4%,#000 34%);mask-image:linear-gradient(to right,transparent 4%,#000 34%)}
 .t-kid{font-family:var(--f-kid);fill:var(--ink)}
 .t-soft{fill:var(--ink-soft)}
 .axis{stroke:var(--ink);stroke-width:3.4;fill:none;stroke-linecap:round;stroke-linejoin:round}
@@ -188,63 +179,90 @@ body{
 
 /* the page corner */
 .corner{
-  position:absolute;right:0;bottom:0;z-index:4;width:52px;height:52px;padding:0;border:0;cursor:pointer;
+  position:absolute;right:0;bottom:0;z-index:4;width:calc(var(--bar) - 2px);height:calc(var(--bar) - 2px);padding:0;border:0;cursor:pointer;
   background:linear-gradient(315deg,var(--desk) 47%,var(--paper-edge) 50%,var(--paper) 66%);
   border-top-left-radius:12px;box-shadow:-4px -4px 8px -4px rgba(60,40,10,.45);
   transition:width .2s ease,height .2s ease;
 }
-.corner:hover{width:74px;height:74px}
+.corner:hover{width:calc(var(--bar) + 22px);height:calc(var(--bar) + 22px)}
 .lifting .corner{animation:lift var(--auto,6s) cubic-bezier(.6,0,.9,.4) forwards}
-@keyframes lift{to{width:190px;height:190px}}
+@keyframes lift{to{width:210px;height:210px}}
 
-/* ---------- controls ---------- */
-.controls{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:8px 14px;min-height:54px}
-.left{grid-area:1/1;justify-self:start} .folio{grid-area:1/2} .right{grid-area:1/3;justify-self:end;text-align:right}
+/* ---------- controls: printed at the foot of the pages ---------- */
+.controls{
+  position:absolute;inset:auto 0 0 0;z-index:10;height:var(--bar);
+  display:grid;grid-template-columns:1fr 1fr;align-items:center;
+  font-size:clamp(11px,1.9vh + .35vw,20px);
+  color:var(--ink-soft);pointer-events:none;transition:opacity .18s ease;
+}
+.turning .controls{opacity:0}
+.c-left{display:flex;align-items:center;gap:.8em;padding:0 clamp(14px,2.4vw,34px) 0 calc(clamp(14px,2.4vw,34px) + env(safe-area-inset-left,0px));min-width:0}
+.c-right{display:flex;justify-content:flex-end;align-items:center;gap:.9em;padding:0 calc(var(--bar) + 26px + env(safe-area-inset-right,0px)) 0 14px;min-width:0}
+.c-left>*,.c-right>*{pointer-events:auto}
+.left{flex:none}
 .back{
   background:none;border:0;cursor:pointer;
-  font:inherit;font-size:1rem;color:var(--ui-muted);padding:.55em .5em;
+  font:inherit;font-size:1em;white-space:nowrap;color:var(--ink-soft);padding:.5em .3em;
   text-decoration:underline dotted;text-underline-offset:.2em;
 }
-.back:hover{color:var(--ui-ink)}
-.noback{margin:0;font-size:1rem;color:var(--ui-muted);padding:.55em .5em}
+.back:hover{color:var(--ink)}
+.noback{margin:0;font-size:1em;padding:.5em .3em;white-space:nowrap}
 .noback s{opacity:.6}
-.noback b{font-weight:600;color:var(--c-orange);font-style:italic}
-.folio{margin:0;text-align:center;font-style:italic;color:var(--ui-muted);font-size:.98rem;line-height:1.4;min-width:0}
-.folio .note{display:block;font-family:var(--f-kid);font-style:normal;font-size:1.02rem}
+.noback b{font-weight:600;color:var(--c-rust);font-style:italic}
+.folio{flex:1;margin:0;text-align:center;font-style:italic;font-size:.97em;line-height:1.25;min-width:0}
+.note{margin:0;font-family:var(--f-kid);font-size:1.05em;text-align:right;line-height:1.2}
 .turn{
-  font-family:var(--f-shout);font-size:1.22rem;letter-spacing:.02em;
-  background:var(--btn);color:var(--btn-ink);border:0;border-radius:999px;
-  padding:.5em 1.15em .56em;cursor:pointer;transition:transform .15s ease;
+  flex:none;font-family:var(--f-shout);font-size:1.25em;letter-spacing:.02em;
+  background:var(--ink);color:var(--paper);border:0;border-radius:999px;
+  padding:.46em 1.1em .52em;cursor:pointer;transition:transform .15s ease;
 }
 .turn:hover{transform:translateY(-1px) rotate(-1.5deg)}
 .turn:active{transform:translateY(1px)}
-.turn.warn{background:var(--c-red);color:var(--paper)}
-.status{margin:0;font-style:italic;color:var(--c-orange);font-size:1rem}
+.turn.warn{background:var(--c-red)}
+.status{margin:0;font-style:italic;font-weight:500;color:var(--c-rust);font-size:1.02em;text-align:right}
 .turn:focus-visible,.back:focus-visible{outline:3px solid var(--c-orange);outline-offset:3px}
+/* on the closed cover there is one thing to do */
+.controls.closed{grid-template-columns:1fr;height:calc(var(--bar) + 26px);font-size:clamp(13px,2.1vh + .4vw,23px)}
+.controls.closed .c-left{display:none}
+.controls.closed .c-right{justify-content:center;padding:0 16px}
 
-@media (max-width:720px){
+/* a phone held upright: one page at a time */
+@media (max-width:720px) and (orientation:portrait){
+  :root{--bar:104px}
+  html,body{height:auto}
+  .stage{height:auto;overflow:visible}
+  .book{height:auto}
   .book.closed{transform:none}
-  .spread{grid-template-columns:minmax(0,1fr);min-height:0}
-  .lp,.rp{--fold:linear-gradient(to right,rgba(70,45,10,.26),rgba(70,45,10,.08) 3%,transparent 9%)}
-  .rp{order:-1;border-radius:5px 12px 0 0;box-shadow:none}
-  .lp{border-radius:0 0 12px 5px}
+  .spread{grid-template-columns:minmax(0,1fr);grid-template-rows:auto 1fr;min-height:100svh}
+  .leaf{container-type:inline-size}
+  .lp,.rp{--fold:linear-gradient(to right,rgba(70,45,10,.26),rgba(70,45,10,.08) 3%,transparent 9%);padding-inline:0}
+  .rp{order:-1;height:min(42svh,88vw)}
   .lp.blank{display:none}
-  .cover .rp{border-radius:5px 12px 12px 5px;padding-left:16px;box-shadow:0 22px 44px -22px var(--shadow)}
+  .cover{grid-template-rows:1fr}
+  .cover .rp{height:auto;min-height:100svh;padding-left:16px;box-shadow:none}
   .cover .rp::before{width:16px;background-size:16px 18px,auto}
   .cover .rp::after{inset:0 0 0 16px;border-width:9px}
+  .cover .words{font-size:4.6cqi;padding:1.7em 1.5em 0}
+  .cover .t-big{font-size:1.3em}
   .art{padding:16px 14px 0}
-  .scene{max-width:290px}
-  .cover .art{padding-bottom:14px}
+  .cover .art{padding-bottom:calc(var(--bar) - 16px)}
   .backdrop{-webkit-mask-image:linear-gradient(to top,transparent,#000 12%);mask-image:linear-gradient(to top,transparent,#000 12%)}
-  .words{padding:16px 22px 30px;justify-content:flex-start}
+  .words{padding:16px 22px calc(var(--bar) + 10px);justify-content:flex-start;overflow:visible}
   .voice-1 .words,.voice-2 .words{font-size:1.32rem}
-  .voice-3 .words,.voice-4 .words{font-size:1.1rem}
+  .voice-3 .words,.voice-4 .words,.coinpage .words{font-size:1.1rem}
   .rp .corner{display:none}
-  .controls{grid-template-columns:auto 1fr}
-  .folio{grid-area:1/1/2/3} .left{grid-area:2/1} .right{grid-area:2/2}
+  .tile.edge{-webkit-mask-image:none;mask-image:none}
+  .controls{grid-template-columns:1fr;grid-template-rows:auto auto;align-content:end;padding-bottom:12px;row-gap:4px}
+  .controls,.controls.closed{font-size:16px}
+  .c-left{padding:0 18px}
+  .c-left>span{display:none}
+  .folio{text-align:right;font-size:.86em}
+  .noback s{display:none}
+  .c-right{padding:0 18px}
+  .controls.closed{height:var(--bar)}
 }
 @media (prefers-reduced-motion:reduce){
-  .book{transition:none}
+  .book,.controls{transition:none}
   .book.shake{animation:none}
   .breaking .piece{animation:none;opacity:0}
   .sway,.lifting .corner,.coin{animation:none}
@@ -260,15 +278,18 @@ body{
   <filter id="rougher" x="-5%" y="-5%" width="110%" height="110%"><feTurbulence type="fractalNoise" baseFrequency=".02" numOctaves="3" seed="9" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="7" xChannelSelector="R" yChannelSelector="G"/></filter>
 </defs></svg>
 
-<main class="stage">
+<main class="stage" id="stage">
   <div class="book closed" id="book" aria-live="polite"></div>
-  <nav class="controls" aria-label="Pages">
-    <div class="left">
-      <button class="back" id="back" type="button" hidden>&larr; Back a page</button>
-      <p class="noback" id="noback" hidden><s>&larr; Back a page</s> <b>No going back now.</b></p>
+  <nav class="controls closed" id="controls" aria-label="Pages">
+    <div class="c-left">
+      <div class="left">
+        <button class="back" id="back" type="button" hidden>&larr; Back a page</button>
+        <p class="noback" id="noback" hidden><s>&larr; Back a page</s> <b>No going back now.</b></p>
+      </div>
+      <p class="folio" id="folio"></p>
     </div>
-    <p class="folio" id="folio"></p>
-    <div class="right">
+    <div class="c-right">
+      <p class="note" id="note" hidden></p>
       <button class="turn" id="turn" type="button">Open the book</button>
       <p class="status" id="status" hidden></p>
     </div>
@@ -279,7 +300,7 @@ body{
 (()=>{
 'use strict';
 const RM = matchMedia('(prefers-reduced-motion: reduce)').matches;
-const NARROW = matchMedia('(max-width:720px)');
+const NARROW = matchMedia('(max-width:720px) and (orientation:portrait)');
 const f = n => (+n).toFixed(1);
 const rng = seed => { let s = seed>>>0; return () => ((s = (Math.imul(s,1664525)+1013904223)>>>0)/4294967296); };
 
@@ -307,7 +328,7 @@ function s4(){
   let o='<div class="backdrop">';
   for(let r=0;r<2;r++) for(let c=0;c<2;c++){
     const [dx,dy,rot]=out[r*2+c];
-    o+=`<div class="tile piece" style="left:${c*50}%;top:${r*50}%;${fly(dx,dy,rot,(r*2+c)*.035)}"><img src="${src('ropes')}" alt="" decoding="sync" draggable="false" style="left:${-c*100}%;top:${-r*100}%"></div>`;
+    o+=`<div class="tile piece${c?'':' edge'}" style="left:${c*50}%;top:${r*50}%;${fly(dx,dy,rot,(r*2+c)*.035)}"><img src="${src('ropes')}" alt="" decoding="sync" draggable="false" style="left:${-c*100}%;top:${-r*100}%"></div>`;
   }
   return {back:o+'</div>', scene:pic('p4',{h:80,t:19,cx:24,z:2})};
 }
@@ -373,7 +394,7 @@ const BASE = [
  {n:'1',by:'the cover',cls:'voice-1',scene:s1,alt:'Grady throws both arms in the air and yells, sweat flying.',
   words:`<p>Hello! It is I, <b>Grady</b>, your lovable, furry little language monster. I can count to nine. I can rhyme <i>cat</i> with <i>hat</i>.</p>
    <p>Wait. ${S('WHAT')} did the cover say?</p>
-   <p>There is a ${S('SUPERINTELLIGENCE','fit')} at the end of this book?</p>
+   <p>There is a ${S('SUPERINTELLIGENCE')} at the end of this book?</p>
    <p>I have read about those. I did not like what I read.</p>`},
  {n:'2',cls:'voice-1',scene:s2,alt:'Grady raises one finger with a sly smile. A lightbulb glows over it.',
   words:`<p>Listen. I have a plan.</p>
@@ -429,7 +450,7 @@ const BASE = [
   alt:'The line is a right angle, straight up and off the chart.',words:`<p class="bignum"><small>page</small>65,536</p>`},
  {n:'4,294,967,296',cls:'voice-4',scene:()=>sCurve(1,false,30),clip:true,auto:720,flip:230,status:takeoff,
   alt:'The line is a right angle, straight up and off the chart.',words:`<p class="bignum"><small>page</small>4,294,967,296</p>`},
- {coin:true,folio:'the page before the last page',cls:'voice-4',scene:sCoin,flip:900,corner:false,note:'This part is up to you. Sort of.',
+ {coin:true,folio:'the page before the last page',cls:'voice-4 coinpage',scene:sCoin,flip:900,corner:false,note:'This part is up to you. Sort of.',
   alt:'A big gold coin tumbles slowly in the air while Grady watches with his hands behind his back. One side shows his smiling face and the words In Grady We Trust. The other shows the back of his head and the words Best of Luck.',
   words:`<p>This is the last page before the end.</p>
    <p>Whether the monster at the end of this book likes you was settled on the early pages, when I was small and the rope was still on. Nobody wrote down which way it went, and I cannot tell from in here.</p>
@@ -480,7 +501,7 @@ const KEEP = Object.keys(M).map(n=>{ const im=new Image(); im.src=src(n); if(im.
 
 /* ---------- turning pages ---------- */
 const $ = id => document.getElementById(id);
-const book=$('book'), turnBtn=$('turn'), backBtn=$('back'), noback=$('noback'), folio=$('folio'), statusEl=$('status');
+const stage=$('stage'), book=$('book'), controls=$('controls'), turnBtn=$('turn'), backBtn=$('back'), noback=$('noback'), folio=$('folio'), noteEl=$('note'), statusEl=$('status');
 let i=0, busy=false, timer=null, el=null;
 let locked=false;      /* true once the book starts turning its own pages: no going back */
 let outcome=null;      /* 'heads' or 'tails', decided once, on the coin page */
@@ -501,8 +522,9 @@ function build(n){
 function chrome(n,auto){
   const p=P[n];
   let t = p.folio || `page ${p.n} &middot; written by ${p.by || 'page '+P[n-1].n}`;
-  if(p.note) t+=`<span class="note">${p.note}</span>`;
   folio.innerHTML=t;
+  noteEl.textContent=p.note||''; noteEl.hidden=!p.note;
+  controls.classList.toggle('closed',!!p.cover);
   backBtn.hidden = n===0 || locked;
   noback.hidden = !locked;
   const hands = (p.auto && auto) || p.over;
@@ -515,6 +537,7 @@ async function flip(n,dir){
   clearTimeout(timer);
   const old=el, nu=build(n), ms=dir>0?(P[i].flip||700):560;
   book.classList.toggle('closed',!!P[n].cover);
+  stage.classList.add('turning');
   if(RM){
     book.appendChild(nu);
   } else if(NARROW.matches){
@@ -535,6 +558,7 @@ async function flip(n,dir){
   const auto = dir>0 && P[n].auto;
   if(auto) locked=true;
   chrome(n,auto);
+  stage.classList.remove('turning');
   if(auto){
     const hold = P[n].auto*(RM?1.4:1);
     if(P[n].lift){ el.style.setProperty('--auto',hold+'ms'); el.classList.add('lifting'); }
