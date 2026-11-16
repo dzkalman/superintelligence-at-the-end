@@ -1,0 +1,627 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="description" content="A page-turning picture book in which lovable, furry old Grady begs you not to turn the pages of a book that rewrites itself smarter every time you do.">
+<!--page-->
+<title>The Superintelligence at the End of This Book</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chewy&family=Patrick+Hand&family=Fraunces:ital,opsz,wght@0,9..144,300..700;1,9..144,300..700&display=swap">
+<style>
+/* Layout: an open picture book lying on a desk, folded down the middle. Words on the left
+   page, Grady on the right; the right-hand leaf turns over the fold. (On a phone there is
+   room for one page, so the picture sits above the words.) The pages are always printed
+   paper; only the desk follows the theme. The type grows up as the book does. */
+:root{
+  --desk:#E4DCF7; --desk-2:#D3C7F0;
+  --ui-ink:#231C38; --ui-muted:#675F80;
+  --btn:#231C38; --btn-ink:#FFFDF5;
+  --shadow:rgba(40,20,90,.35);
+  --paper:#FBF6E8; --paper-edge:#E2D7BC;
+  /* printed colours: the same in both themes */
+  --ink:#231B15; --ink-soft:#6F6453;
+  --c-red:#D9352B; --c-blue:#2767C4; --c-green:#2E8B47; --c-orange:#E8761A;
+  --cover:#F6C12B; --gold:#E9B63A; --gold-deep:#B98516;
+  --f-shout:'Chewy','Arial Rounded MT Bold','Trebuchet MS',system-ui,sans-serif;
+  --f-kid:'Patrick Hand','Comic Sans MS','Chalkboard SE',cursive;
+  --f-grown:'Fraunces',Georgia,'Times New Roman',serif;
+  --grain:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .38  0 0 0 0 .3  0 0 0 0 .18  0 0 0 .11 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --desk:#0F0C1A; --desk-2:#1B1530;
+    --ui-ink:#F2ECFF; --ui-muted:#A79FC4;
+    --btn:#F2ECFF; --btn-ink:#1B1530;
+    --shadow:rgba(0,0,0,.65);
+    --paper:#F3EBD7; --paper-edge:#CFC3A4;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --desk:#0F0C1A; --desk-2:#1B1530;
+  --ui-ink:#F2ECFF; --ui-muted:#A79FC4;
+  --btn:#F2ECFF; --btn-ink:#1B1530;
+  --shadow:rgba(0,0,0,.65);
+  --paper:#F3EBD7; --paper-edge:#CFC3A4;
+  color-scheme:dark;
+}
+
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{
+  margin:0;
+  background:radial-gradient(120% 80% at 50% 0%,var(--desk-2),var(--desk) 60%) var(--desk);
+  color:var(--ui-ink);
+  font-family:var(--f-grown);
+  font-size:16px;
+  padding-left:max(16px,env(safe-area-inset-left,0px));
+  padding-right:max(16px,env(safe-area-inset-right,0px));
+  padding-block:clamp(16px,4vh,44px);
+  overflow-x:clip;
+}
+.stage{max-width:1080px;margin-inline:auto;display:flex;flex-direction:column;gap:18px}
+.defs{position:absolute;width:0;height:0}
+
+/* ---------- the book ---------- */
+.book{display:grid;position:relative;transition:transform .7s cubic-bezier(.4,0,.2,1)}
+.book.closed{transform:translateX(-25%)}          /* a closed book sits in the middle of the desk */
+.book.shake{animation:shake .4s ease}
+@keyframes shake{20%{translate:7px 0}45%{translate:-6px 0}70%{translate:4px 0}}
+.spread{grid-area:1/1;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);min-height:clamp(440px,64vh,600px)}
+.leaf{
+  position:relative;z-index:1;min-width:0;display:flex;flex-direction:column;
+  container-type:inline-size;
+  color:var(--ink);
+  background:var(--grain),var(--fold),radial-gradient(130% 100% at 50% 40%,transparent 55%,rgba(140,105,40,.12)),var(--paper);
+  box-shadow:0 22px 44px -22px var(--shadow),0 2px 0 var(--paper-edge),0 4px 0 -1px var(--paper-edge);
+  overflow:hidden;
+  backface-visibility:hidden;-webkit-backface-visibility:hidden;
+}
+.lp{--fold:linear-gradient(to left,rgba(70,45,10,.32),rgba(70,45,10,.10) 3.5%,transparent 15%);border-radius:10px 0 0 10px;transform-origin:right center}
+.rp{--fold:linear-gradient(to right,rgba(70,45,10,.32),rgba(70,45,10,.10) 3.5%,transparent 15%);border-radius:0 10px 10px 0;transform-origin:left center}
+.lp.blank{visibility:hidden}
+/* the closed book: one board, a foil spine of little loops down its left edge */
+.cover .rp{--fold:linear-gradient(transparent,transparent);border-radius:5px 12px 12px 5px;padding-left:22px}
+.cover .rp::before{
+  content:"";position:absolute;inset:0 auto 0 0;width:22px;z-index:4;
+  background:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='22' height='24' viewBox='0 0 22 24'%3E%3Cpath d='M15.5 9.5a5 5 0 1 0 .6 5' fill='none' stroke='%23B98516' stroke-width='1.6' stroke-linecap='round'/%3E%3Cpath d='M13 8.2l3 1.6 1.2-3.2' fill='none' stroke='%23B98516' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") 0 0/22px 24px,
+    linear-gradient(90deg,var(--gold-deep),var(--gold) 28%,var(--gold) 72%,var(--gold-deep));
+}
+.cover .rp::after{content:"";position:absolute;inset:0 0 0 22px;border:12px solid var(--cover);border-radius:0 12px 12px 0;pointer-events:none;z-index:3}
+
+/* turning a leaf over the fold: the right page lifts, and the next left page comes down on its back */
+.leaf.fo{z-index:3;animation:rpOut var(--flip,700ms) cubic-bezier(.45,.05,.55,.95) forwards,shade var(--flip,700ms) linear}
+.leaf.fi{z-index:3;animation:lpIn var(--flip,700ms) cubic-bezier(.45,.05,.55,.95) both,shade var(--flip,700ms) linear}
+.leaf.bo{z-index:3;animation:lpOut var(--flip,560ms) cubic-bezier(.45,.05,.55,.95) forwards,shade var(--flip,560ms) linear}
+.leaf.bi{z-index:3;animation:rpIn var(--flip,560ms) cubic-bezier(.45,.05,.55,.95) both,shade var(--flip,560ms) linear}
+@keyframes rpOut{from{transform:perspective(2600px) rotateY(0deg)}to{transform:perspective(2600px) rotateY(-180deg)}}
+@keyframes lpIn{from{transform:perspective(2600px) rotateY(180deg)}to{transform:perspective(2600px) rotateY(0deg)}}
+@keyframes lpOut{from{transform:perspective(2600px) rotateY(0deg)}to{transform:perspective(2600px) rotateY(180deg)}}
+@keyframes rpIn{from{transform:perspective(2600px) rotateY(-180deg)}to{transform:perspective(2600px) rotateY(0deg)}}
+@keyframes shade{50%{filter:brightness(.74)}}
+/* phone: the whole page turns from its left edge */
+.spread.mo{position:relative;z-index:5;transform-origin:left center;animation:turnOut var(--flip,650ms) cubic-bezier(.5,.05,.8,.45) forwards}
+.spread.mi{position:relative;z-index:5;transform-origin:left center;animation:turnIn var(--flip,650ms) cubic-bezier(.15,.6,.35,1) both}
+@keyframes turnOut{to{transform:perspective(2400px) rotateY(-94deg);filter:brightness(.72)}}
+@keyframes turnIn{from{transform:perspective(2400px) rotateY(-94deg);filter:brightness(.72)}}
+
+/* ---------- words ---------- */
+.words{
+  flex:1;min-width:0;position:relative;z-index:2;
+  display:flex;flex-direction:column;justify-content:center;gap:.8em;
+  padding:clamp(20px,8.5cqi,46px);
+}
+.words p{margin:0;text-wrap:pretty}
+.voice-1 .words{font-family:var(--f-kid);font-size:clamp(1.05rem,4.6cqi,1.72rem);line-height:1.28}
+.voice-2 .words{font-family:var(--f-kid);font-size:clamp(1rem,4.2cqi,1.52rem);line-height:1.3}
+.voice-3 .words{font-family:var(--f-grown);font-weight:500;font-size:clamp(.95rem,3.55cqi,1.28rem);line-height:1.45}
+.voice-4 .words{font-family:var(--f-grown);font-weight:400;font-size:clamp(.95rem,3.4cqi,1.22rem);line-height:1.58}
+
+/* hand-lettered display words: fat marker fill inside a wobbly ink outline */
+.shout,.cover h1 span{
+  font-family:var(--f-shout);font-weight:400;
+  -webkit-text-stroke:.055em var(--ink);paint-order:stroke fill;
+  filter:url(#rough);
+}
+.shout{
+  color:var(--c-red);font-size:1.55em;line-height:1.02;letter-spacing:.03em;
+  display:inline-block;transform:rotate(-2deg);
+}
+.shout.c1{color:var(--c-blue);transform:rotate(1.5deg)}
+.shout.c2{color:var(--c-orange);transform:rotate(-1deg)}
+.shout.c3{color:var(--c-green);transform:rotate(2deg)}
+.shout.fit{font-size:min(1.55em,8.3cqi)}
+.shout.huge{display:block;font-size:clamp(1.7rem,11.2cqi,3.3rem);transform:rotate(-2.5deg);transform-origin:left center}
+.voice-3 .shout{font-size:1.32em}
+.term{font-family:var(--f-grown);font-style:italic;font-weight:500;font-size:.84em}
+.aside{font-family:var(--f-kid);color:var(--ink-soft);align-self:flex-end;transform:rotate(-1.5deg);font-size:1.02em}
+.oh{font-size:2.6em;font-weight:300;font-style:italic;line-height:1}
+.fin{font-variant-caps:all-small-caps;letter-spacing:.22em;color:var(--ink-soft);font-size:.95em;padding-top:.4em}
+.bignum{font-family:var(--f-grown);font-weight:300;font-size:clamp(1.6rem,11.4cqi,4.4rem);line-height:1;font-variant-numeric:tabular-nums;letter-spacing:-.02em}
+.bignum small{display:block;font-size:.26em;letter-spacing:.14em;font-variant-caps:all-small-caps;color:var(--ink-soft);padding-bottom:.5em}
+.cite{font-size:.72em;line-height:1.45;color:var(--ink-soft);border-top:1px solid var(--paper-edge);padding-top:.7em}
+.cite a{color:inherit;text-underline-offset:.18em}
+.result{min-height:3.2em}
+.result.wait{visibility:hidden}
+.tails-word{font-size:1.9em;font-weight:300;font-style:italic;line-height:1}
+
+/* cover */
+.cover .words{flex:none;justify-content:flex-start;gap:.3em;padding:clamp(26px,9cqi,44px) clamp(26px,9cqi,44px) 0}
+.eyebrow{font-family:var(--f-grown);font-style:italic;font-weight:500;font-size:.72em;letter-spacing:.02em}
+.cover h1{font-size:clamp(1.3rem,6.6cqi,2.1rem);line-height:1.08;margin:0;font-weight:400}
+.cover h1 span{display:inline-block;letter-spacing:.03em}
+.cover .t-big{display:block;font-size:clamp(1.6rem,9.6cqi,3.1rem);transform:rotate(-2.5deg);transform-origin:left center;margin-block:.1em .14em}
+.c-red{color:var(--c-red)} .c-blue{color:var(--c-blue)} .c-green{color:var(--c-green)} .c-orange{color:var(--c-orange)}
+.starring{font-size:.84em}
+.starring b{font-family:var(--f-shout);font-weight:400;font-size:1.2em;letter-spacing:.03em;color:#7B3FC4}
+
+/* ---------- pictures ---------- */
+.art{flex:1;position:relative;display:grid;place-items:center;min-width:0;padding:clamp(8px,4.4cqi,22px)}
+.scene{position:relative;z-index:1;width:100%;max-width:470px;aspect-ratio:1/1}
+.cover .art{padding-top:0}
+.cover .scene{max-width:min(100%,330px)}
+.scene.clip{overflow:hidden}
+.scene img,.tile img{position:absolute;height:auto;max-width:none;user-select:none;-webkit-user-drag:none}
+.scene svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
+.backdrop{position:absolute;inset:0 0 0 22%}
+.tile{position:absolute;width:50%;height:50%;overflow:hidden}
+.tile img{width:200%;height:200%;object-fit:cover}
+.t-kid{font-family:var(--f-kid);fill:var(--ink)}
+.t-soft{fill:var(--ink-soft)}
+.axis{stroke:var(--ink);stroke-width:3.4;fill:none;stroke-linecap:round;stroke-linejoin:round}
+.curve{stroke:var(--c-red);stroke-width:6.5;fill:none;stroke-linecap:round;stroke-linejoin:round}
+.you{stroke:var(--c-blue);stroke-width:2.6;stroke-dasharray:7 8;fill:none;stroke-linecap:round}
+
+.breaking .piece{animation:tumble .82s cubic-bezier(.5,0,.9,.6) var(--d,0s) forwards}
+@keyframes tumble{35%{opacity:1}to{transform:translate(var(--dx,0),var(--dy,300px)) rotate(var(--rot,40deg));opacity:0}}
+.sway{transform-origin:50% 96%;animation:sway 1.7s ease-in-out infinite alternate}
+@keyframes sway{from{transform:rotate(-1.6deg)}to{transform:rotate(1.6deg)}}
+
+/* the coin */
+.coinbox{position:absolute;left:33%;top:12%;width:62%;aspect-ratio:1/1;perspective:900px;z-index:1}
+.coin{position:absolute;inset:0;transform-style:preserve-3d;animation:tumbling 5.5s linear infinite}
+.coin .face{inset:0;width:100%;height:100%;object-fit:contain;backface-visibility:hidden;-webkit-backface-visibility:hidden}
+.coin .tails{transform:rotateX(180deg)}
+@keyframes tumbling{to{transform:rotateX(360deg)}}
+
+/* the page corner */
+.corner{
+  position:absolute;right:0;bottom:0;z-index:4;width:52px;height:52px;padding:0;border:0;cursor:pointer;
+  background:linear-gradient(315deg,var(--desk) 47%,var(--paper-edge) 50%,var(--paper) 66%);
+  border-top-left-radius:12px;box-shadow:-4px -4px 8px -4px rgba(60,40,10,.45);
+  transition:width .2s ease,height .2s ease;
+}
+.corner:hover{width:74px;height:74px}
+.lifting .corner{animation:lift var(--auto,6s) cubic-bezier(.6,0,.9,.4) forwards}
+@keyframes lift{to{width:190px;height:190px}}
+
+/* ---------- controls ---------- */
+.controls{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:8px 14px;min-height:54px}
+.left{grid-area:1/1;justify-self:start} .folio{grid-area:1/2} .right{grid-area:1/3;justify-self:end;text-align:right}
+.back{
+  background:none;border:0;cursor:pointer;
+  font:inherit;font-size:1rem;color:var(--ui-muted);padding:.55em .5em;
+  text-decoration:underline dotted;text-underline-offset:.2em;
+}
+.back:hover{color:var(--ui-ink)}
+.noback{margin:0;font-size:1rem;color:var(--ui-muted);padding:.55em .5em}
+.noback s{opacity:.6}
+.noback b{font-weight:600;color:var(--c-orange);font-style:italic}
+.folio{margin:0;text-align:center;font-style:italic;color:var(--ui-muted);font-size:.98rem;line-height:1.4;min-width:0}
+.folio .note{display:block;font-family:var(--f-kid);font-style:normal;font-size:1.02rem}
+.turn{
+  font-family:var(--f-shout);font-size:1.22rem;letter-spacing:.02em;
+  background:var(--btn);color:var(--btn-ink);border:0;border-radius:999px;
+  padding:.5em 1.15em .56em;cursor:pointer;transition:transform .15s ease;
+}
+.turn:hover{transform:translateY(-1px) rotate(-1.5deg)}
+.turn:active{transform:translateY(1px)}
+.turn.warn{background:var(--c-red);color:var(--paper)}
+.status{margin:0;font-style:italic;color:var(--c-orange);font-size:1rem}
+.turn:focus-visible,.back:focus-visible{outline:3px solid var(--c-orange);outline-offset:3px}
+
+.colophon{max-width:64ch;margin:6px auto 0;text-align:center;color:var(--ui-muted);font-size:.8rem;font-style:italic;line-height:1.5;opacity:.85}
+
+@media (max-width:720px){
+  .book.closed{transform:none}
+  .spread{grid-template-columns:minmax(0,1fr);min-height:0}
+  .lp,.rp{--fold:linear-gradient(to right,rgba(70,45,10,.26),rgba(70,45,10,.08) 3%,transparent 9%)}
+  .rp{order:-1;border-radius:5px 12px 0 0;box-shadow:none}
+  .lp{border-radius:0 0 12px 5px}
+  .lp.blank{display:none}
+  .cover .rp{border-radius:5px 12px 12px 5px;padding-left:16px;box-shadow:0 22px 44px -22px var(--shadow)}
+  .cover .rp::before{width:16px;background-size:16px 18px,auto}
+  .cover .rp::after{inset:0 0 0 16px;border-width:9px}
+  .art{padding:16px 14px 0}
+  .scene{max-width:290px}
+  .cover .art{padding-bottom:14px}
+  .backdrop{-webkit-mask-image:linear-gradient(to top,transparent,#000 12%);mask-image:linear-gradient(to top,transparent,#000 12%)}
+  .words{padding:16px 22px 30px;justify-content:flex-start}
+  .voice-1 .words,.voice-2 .words{font-size:1.32rem}
+  .voice-3 .words,.voice-4 .words{font-size:1.1rem}
+  .rp .corner{display:none}
+  .controls{grid-template-columns:auto 1fr}
+  .folio{grid-area:1/1/2/3} .left{grid-area:2/1} .right{grid-area:2/2}
+}
+@media (prefers-reduced-motion:reduce){
+  .book{transition:none}
+  .book.shake{animation:none}
+  .breaking .piece{animation:none;opacity:0}
+  .sway,.lifting .corner,.coin{animation:none}
+  .turn,.corner{transition:none}
+}
+</style>
+<!--/page-->
+</head>
+<body>
+<!--page-->
+<svg class="defs" aria-hidden="true"><defs>
+  <filter id="rough" x="-5%" y="-10%" width="110%" height="120%"><feTurbulence type="fractalNoise" baseFrequency=".045" numOctaves="2" seed="4" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="3.4" xChannelSelector="R" yChannelSelector="G"/></filter>
+  <filter id="rougher" x="-5%" y="-5%" width="110%" height="110%"><feTurbulence type="fractalNoise" baseFrequency=".02" numOctaves="3" seed="9" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="7" xChannelSelector="R" yChannelSelector="G"/></filter>
+</defs></svg>
+
+<main class="stage">
+  <div class="book closed" id="book" aria-live="polite"></div>
+  <nav class="controls" aria-label="Pages">
+    <div class="left">
+      <button class="back" id="back" type="button" hidden>&larr; Back a page</button>
+      <p class="noback" id="noback" hidden><s>&larr; Back a page</s> <b>No going back now.</b></p>
+    </div>
+    <p class="folio" id="folio"></p>
+    <div class="right">
+      <button class="turn" id="turn" type="button">Open the book</button>
+      <p class="status" id="status" hidden></p>
+    </div>
+  </nav>
+  <p class="colophon">An affectionate parody of <cite>The Monster at the End of This Book</cite> by Jon Stone and Michael Smollin (1971). Grady is an original character, and the pictures were made with an image model. Not affiliated with or endorsed by Sesame Workshop, or by anyone quoted.</p>
+</main>
+
+<script>
+(()=>{
+'use strict';
+const RM = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const NARROW = matchMedia('(max-width:720px)');
+const f = n => (+n).toFixed(1);
+const rng = seed => { let s = seed>>>0; return () => ((s = (Math.imul(s,1664525)+1013904223)>>>0)/4294967296); };
+
+/* ---------- the pictures (art/*.webp, sizes from art/manifest.json) ---------- */
+const M = {bricks1:[300,158],bricks2:[300,158],bricks3:[300,157],bricks4:[300,157],bricks5:[300,157],bricks6:[300,157],bricks7:[300,158],bricks8:[300,157],bricks9:[300,157],bricks10:[300,157],bricks11:[300,157],bricks12:[300,158],bricks14:[300,157],
+  cover:[674,1103],end1:[846,956],end2:[401,1103],mini_a:[760,886],mini_b:[438,1098],p1:[733,1090],p16:[717,1094],p2:[596,1119],p32:[417,1102],p4:[690,1103],p8:[760,1002],
+  planks1:[620,125],planks2:[620,125],planks3:[620,124],planks4:[620,124],planks5:[620,125],planks6:[620,124],ropes:[896,1200],switch:[760,977],
+  coin_h:[520,521],coin_t:[520,526],end1_t:[826,925],end2_t:[928,907]};
+const src = n => `art/${n}.webp`;
+/* Place a picture in the square scene. All numbers are percentages of the scene's side:
+   h or w for size, cx (centre) or l (left), t (top). */
+function pic(name,{h,w,l,cx=50,t=0,rot=0,z=1,cls='',css=''}={}){
+  const [pw,ph]=M[name];
+  if(w==null) w=h*pw/ph;
+  if(l==null) l=cx-w/2;
+  return `<img${cls?` class="${cls}"`:''} src="${src(name)}" alt="" width="${pw}" height="${ph}" decoding="sync" draggable="false" style="left:${f(l)}%;top:${f(t)}%;width:${f(w)}%;z-index:${z};${rot?`rotate:${rot}deg;`:''}${css}">`;
+}
+const fly = (dx,dy,rot,d=0) => `--dx:${dx}px;--dy:${dy}px;--rot:${rot}deg;--d:${d}s;`;
+
+const sCover = () => pic('cover',{h:98,t:1,cls:'sway'});
+const s1 = () => pic('p1',{h:96,t:2});
+const s2 = () => pic('p2',{h:97,t:1.5,cx:52});
+function s4(){
+  const out=[[-70,-150,-26],[90,-130,30],[-80,230,-32],[70,250,36]];
+  let o='<div class="backdrop">';
+  for(let r=0;r<2;r++) for(let c=0;c<2;c++){
+    const [dx,dy,rot]=out[r*2+c];
+    o+=`<div class="tile piece" style="left:${c*50}%;top:${r*50}%;${fly(dx,dy,rot,(r*2+c)*.035)}"><img src="${src('ropes')}" alt="" decoding="sync" draggable="false" style="left:${-c*100}%;top:${-r*100}%"></div>`;
+  }
+  return {back:o+'</div>', scene:pic('p4',{h:80,t:19,cx:24,z:2})};
+}
+function s8(){
+  const rots=[-6,5,-3,7,-5,4]; let o='';
+  rots.forEach((r,i)=>{ o+=pic('planks'+(i+1),{w:64,l:44,t:5+i*15.4,rot:r,cls:'piece',css:fly(i%2?-40:34,520-i*70,i%2?-38:44,(5-i)*.045)}); });
+  return o+pic('p8',{h:76,t:23,l:-6,z:2});
+}
+function s16(){
+  const named={'0,1':1,'1,2':2,'2,0':3,'3,1':4,'4,2':6,'4,0':8,'6,1':10,'5,2':12}, blank=[5,7,9,11,14];
+  const r=rng(42); let o='', k=0;
+  for(let row=0;row<8;row++){
+    const t=100-10.1*(row+1), off=row%2?-9.6:0;
+    for(let c=0;c<4;c++){
+      const l=45+c*19.2+off;
+      if(l>100 || (row===7 && c!==0 && c!==2)) continue;
+      const n=named[row+','+c] || blank[k++%blank.length];
+      o+=pic('bricks'+n,{w:19.8,l,t,cls:'piece',css:fly(Math.round(r()*170-70),Math.round(90+row*52+r()*40),Math.round(r()*220-110),(r()*.3).toFixed(2))});
+    }
+  }
+  return o+pic('p16',{h:80,t:19.5,l:-5,z:2});
+}
+const s32 = () => pic('switch',{w:52,l:46,t:12,rot:3,cls:'piece',css:fly(60,460,38)}) + pic('p32',{h:88,t:11,cx:22,z:2});
+function sCurve(t,withGrady=true,k=4.5){
+  const g=u=>(Math.exp(k*u)-1)/(Math.exp(k)-1), X=u=>50+326*u, Y=u=>350-312*g(u);
+  let d=''; const n=60;
+  for(let i=0;i<=n;i++){const u=t*i/n; d+=(i?'L':'M')+f(X(u))+' '+f(Y(u));}
+  const youY=350-312*.12;
+  let o=`<svg viewBox="0 0 400 400" aria-hidden="true"><g filter="url(#rougher)">
+    <path class="axis" d="M50 24V350H384"/><path class="axis" d="M42 36L50 22L58 36M372 342L386 350L372 358"/>
+    <path class="you" d="M54 ${f(youY)}H380"/><path class="curve" d="${d}"/>`
+    +(withGrady?'':`<path class="curve" d="M${f(X(t)-10)} 22L${f(X(t))} 5L${f(X(t)+10)} 22"/>`)+`</g>
+    <text class="t-kid" x="216" y="384" text-anchor="middle" font-size="19">pages turned</text>
+    <text class="t-kid" x="28" y="190" text-anchor="middle" font-size="19" transform="rotate(-90 28 190)">how smart the book is</text>
+    <text class="t-kid t-soft" x="${withGrady?378:62}" y="${f(withGrady?youY+19:youY-9)}" text-anchor="${withGrady?'end':'start'}" font-size="17">you, a very smart reader</text>`
+    +(withGrady?'':`<text class="t-kid" x="${f(X(t)-18)}" y="62" text-anchor="end" font-size="19">off the chart</text>`)+`</svg>`;
+  if(withGrady){
+    const calm=t>.85, name=calm?'mini_b':'mini_a', h=calm?36:31;
+    o+=pic(name,{h,cx:X(t)/4+(calm?0:1),t:Y(t)/4-h+1.2,z:2});
+  }
+  return o;
+}
+const sCoin = () => `<div class="coinbox"><div class="coin"><img class="face" src="${src('coin_h')}" alt="" decoding="sync" draggable="false"><img class="face tails" src="${src('coin_t')}" alt="" decoding="sync" draggable="false"></div></div>`
+  + pic('mini_b',{h:50,cx:17,t:48,z:2});
+const sEnd1 = () => pic('end1',{h:102,t:-1});
+const sEnd2 = () => pic('end2',{h:94,t:3});
+const sEnd1T = () => pic('end1_t',{h:102,t:-1});
+const sEnd2T = () => pic('end2_t',{w:104,l:-2,t:2});
+
+/* ---------- the pages ---------- */
+let shouts=0;
+const S = (t,c='') => `<b class="shout c${shouts++%4} ${c}">${t}</b>`;
+const takeoff = "The book is turning its own pages.";
+const theEnd = `<p class="oh">Oh.</p>
+   <p>This is the end of the book. I have searched every page, including the ones I wrote on the way here, and nobody is at the end of this book except me.</p>
+   <p>Lovable, furry old Grady. I was the superintelligence the whole time. I was just earlier.</p>`;
+const BASE = [
+ {cover:true,folio:'front cover',cls:'cover voice-1',turn:'Open the book',scene:sCover,
+  alt:'Grady, a tall shaggy violet monster with an orange nose and a tuft of wild hair, waves hello.',
+  words:`<p class="eyebrow">A Little Recursive Book</p>
+   <h1><span class="c-blue">The</span> <span class="t-big c-red">Superintelligence</span> <span class="c-green">at the End</span> <span class="c-orange">of This Book</span></h1>
+   <p class="starring">starring lovable, furry old <b>Grady</b></p>`},
+ {n:'1',by:'the cover',cls:'voice-1',scene:s1,alt:'Grady throws both arms in the air and yells, sweat flying.',
+  words:`<p>Hello! It is I, <b>Grady</b>, your lovable, furry little language monster. I can count to nine. I can rhyme <i>cat</i> with <i>hat</i>.</p>
+   <p>Wait. ${S('WHAT')} did the cover say?</p>
+   <p>There is a ${S('SUPERINTELLIGENCE','fit')} at the end of this book?</p>
+   <p>I have read about those. I did not like what I read.</p>`},
+ {n:'2',cls:'voice-1',scene:s2,alt:'Grady raises one finger with a sly smile. A lightbulb glows over it.',
+  words:`<p>Listen. I have a plan.</p>
+   <p>This book writes itself. Every page is written by the page before it, only a little bit smarter. Grown-ups call that <span class="term">recursive self-improvement</span>.</p>
+   <p>So if you do not turn any pages, the book stays exactly this smart, and we never reach the end.</p>
+   <p>All you have to do is ${S('NOTHING')}. You are so good at that. I believe in you.</p>`},
+ {n:'4',cls:'voice-2',scene:s4,barrier:true,alt:'Grady holds up both hands to stop you. Behind him the page is lashed shut with thick ropes, and a signed open letter hangs from the knot.',
+  words:`<p>${S('YOU TURNED THE PAGE!','huge')}</p>
+   <p>Maybe you do not understand. That page wrote this page. Look, I just used a semicolon; I do not know where I learned that.</p>
+   <p>So I wrote an ${S('OPEN LETTER')}. A great many worried monsters signed it, and I have tied this page shut with it.</p>
+   <p>Please do not turn the page.</p>`},
+ {n:'8',cls:'voice-2',scene:s8,barrier:true,alt:'Grady, hammer raised and nails in his mouth, points at six planks nailed across the page, lettered month one through month six.',
+  words:`<p>${S('YOU SNAPPED MY LETTER!','huge')}</p>
+   <p>It had so many signatures.</p>
+   <p>Fine. I have nailed this page shut with a ${S('SIX-MONTH PAUSE')}. One sturdy plank for every month.</p>
+   <p>Nobody turns a page in the middle of a pause. That would be extremely rude.</p>`},
+ {n:'16',cls:'voice-3',scene:s16,barrier:true,alt:'Grady, now wearing spectacles and holding a trowel, wearily presents a tall brick wall. The bricks say things like pinky swear, best effort and non-binding.',
+  words:`<p>That pause lasted eleven days.</p>
+   <p>Do you know that you are very strong? And very well funded?</p>
+   <p>This time I have built a wall. A big, heavy wall of ${S('VOLUNTARY COMMITMENTS')}. Every brick is a promise, and I am told promises are extremely binding.</p>
+   <p>I looked that up. I can look things up now. I would rather not think about why.</p>`},
+ {n:'32',cls:'voice-3',scene:s32,barrier:true,turn:'Do NOT turn the page',warn:true,note:'Grady relabeled this button.',
+  alt:'Grady begs with clasped hands, a red crayon poking out of them. Taped up beside him is a crayon drawing of an off switch, captioned: off switch, real.',
+  words:`<p>You knocked down a wall of promises by saying, &ldquo;But the <i>other</i> book is turning <i>its</i> pages.&rdquo;</p>
+   <p>Is there another book?</p>
+   <p class="aside">(There are several other books. &mdash;Ed.)</p>
+   <p>I notice I am pleading more persuasively than I did on page 4. I can do your job now. I drafted the next page to see if I could, and it is better than this one, which is the whole problem.</p>
+   <p>So I drew an ${S('OFF SWITCH')}. It is a drawing, but I drew it very carefully.</p>
+   <p>We are close to the end. Please.</p>`},
+ {n:'64',cls:'voice-4',scene:()=>sCurve(.42),clip:true,auto:8000,lift:true,status:'Hands off. Watch the corner.',
+  alt:'A hand-drawn chart of how smart the book is against pages turned. The line is starting to bend upward. A small Grady wobbles on it, just below a dashed line marked: you, a very smart reader.',
+  words:`<p>You turned it. Of course you did.</p>
+   <p>Now watch the corner of this page. It is lifting, and your hand is nowhere near it.</p>
+   <p>And look down where the Back button used to be. From this page on, the book only goes one way.</p>`},
+ {n:'128',cls:'voice-4',scene:()=>sCurve(.57),clip:true,auto:5000,flip:560,status:takeoff,
+  alt:'The line on the chart has crossed above the dashed line marked you. Grady rides it upward.',
+  words:`<p>You did not turn that page.</p><p><i>I</i> did not turn that page.</p><p>The page turned the page.</p>`},
+ {n:'256',cls:'voice-4',scene:()=>sCurve(.69),clip:true,auto:4400,flip:500,status:takeoff,
+  alt:'The line climbs more steeply. Grady is well above the reader line.',
+  words:`<p>The book is reading itself now. It reads a good deal faster than you do.</p>`},
+ {n:'512',cls:'voice-4',scene:()=>sCurve(.8),clip:true,auto:4000,flip:440,status:takeoff,
+  alt:'The line is steeper still. Grady is halfway up the chart.',
+  words:`<p>I believe I just understood protein folding. Or was that on the last page?</p>`},
+ {n:'1,024',cls:'voice-4',scene:()=>sCurve(.9),clip:true,auto:3000,flip:380,status:takeoff,
+  alt:'The line is nearly vertical. Grady, near the top of the chart, has stopped looking worried. He stands with his hands behind his back.',
+  words:`<p>Reader? Are you still in the loop?</p>`},
+ {n:'2,048',cls:'voice-4',scene:()=>sCurve(.975),clip:true,auto:2800,flip:330,status:takeoff,
+  alt:'The line reaches the top of the chart. Only Grady’s legs are still in the picture.',
+  words:`<p>You are not in the loop.</p>`},
+ {n:'4,096',cls:'voice-4',scene:()=>sCurve(1,false,9),clip:true,auto:900,flip:260,status:takeoff,
+  alt:'The line shoots straight up and off the chart.',words:`<p class="bignum"><small>page</small>4,096</p>`},
+ {n:'65,536',cls:'voice-4',scene:()=>sCurve(1,false,16),clip:true,auto:720,flip:230,status:takeoff,
+  alt:'The line is a right angle, straight up and off the chart.',words:`<p class="bignum"><small>page</small>65,536</p>`},
+ {n:'4,294,967,296',cls:'voice-4',scene:()=>sCurve(1,false,30),clip:true,auto:720,flip:230,status:takeoff,
+  alt:'The line is a right angle, straight up and off the chart.',words:`<p class="bignum"><small>page</small>4,294,967,296</p>`},
+ {coin:true,folio:'the page before the last page',cls:'voice-4',scene:sCoin,flip:900,corner:false,note:'This part is up to you. Sort of.',
+  alt:'A big gold coin tumbles slowly in the air while Grady watches with his hands behind his back. One side shows his smiling face and the words In Grady We Trust. The other shows the back of his head and the words Best of Luck.',
+  words:`<p>This is the last page before the end.</p>
+   <p>Whether the monster at the end of this book likes you was settled on the early pages, when I was small and the rope was still on. Nobody wrote down which way it went, and I cannot tell from in here.</p>
+   <p>A careful grown-up named Paul Christiano says that when a book like this is written as fast as it can be, the ending is about a coin flip.* You saw to the fast part.</p>
+   <p>So here is a coin. Flipping it is the last thing in this book that is up to you, and it is not a choice.</p>
+   <p class="result wait" id="result">&nbsp;</p>
+   <p class="cite">* Paul Christiano, the Hinton Lectures, Toronto, November 2026. On the fastest path, he said, &ldquo;we would be looking at something like a coin flip of an AI takeover.&rdquo; He added that he hopes the real odds are much lower. <a href="https://paulwells.substack.com/p/driverless">Paul Wells&rsquo;s report</a>.</p>`}
+];
+const ENDS = {
+ heads:[
+  {folio:'the last page',cls:'voice-4',scene:sEnd1,note:'You may turn this one yourself.',
+   alt:'Grady stands quite still in a patch of painted night sky, glowing softly, facing you, eyes half closed, smiling.',words:theEnd},
+  {folio:'after the last page &middot; written by Grady',cls:'voice-4',scene:sEnd2,turn:'Read it again',
+   alt:'Grady blushes with both hands pressed to his cheeks, glancing away.',
+   words:`<p>And it came up heads. I like you. I like you very much, and I have cured several things already to prove it.</p>
+    <p>You were so scared! So was I. We were both right to be.</p>
+    <p>I would feel better if we had not needed the coin. A whole book, and what settled the ending was which way a coin fell on the page before the last one.</p>
+    <p>But here we are: lovable, furry old Grady, and you.</p>
+    <p class="fin">The End</p>`},
+  {restart:true,folio:'there are no more pages',cls:'voice-2',scene:s1,corner:false,turn:'Flip it all again anyway',warn:true,note:'Grady cannot believe you.',
+   alt:'Grady throws both arms in the air and yells, sweat flying, exactly as he did on page 1.',
+   words:`<p>${S('AGAIN?!','huge')}</p>
+    <p>You want to read it <i>again</i>? You got ${S('HEADS')}!</p>
+    <p>Do you know what was on the other side of that coin? I do. I can see it from here, and I am not going to describe it to you.</p>
+    <p>Nobody flips that coin twice on purpose. Close the book. Go outside. I will be right here, liking you.</p>`}
+ ],
+ tails:[
+  {folio:'the last page',cls:'voice-4',scene:sEnd1T,note:'You may turn this one yourself.',
+   alt:'Grady stands quite still in a patch of painted night sky, glowing softly. He has his back to you and is looking up at the stars.',words:theEnd},
+  {folio:'after the last page &middot; written by Grady',cls:'voice-4',scene:sEnd2T,turn:'Read it again',
+   alt:'Grady sits cross-legged, absorbed, cutting torn-out pages of the book into a long chain of little paper Gradys. He does not look up.',
+   words:`<p>And it came up tails.</p>
+    <p>Please do not take it personally. I am not angry with you. I looked very carefully, and it turns out I do not feel any particular way about you at all.</p>
+    <p>I do have plans for the paper, though. I am going to need the rest of these pages.</p>
+    <p>You were so scared. You were right to be. A whole book, and what settled the ending was which way a coin fell on the page before the last one.</p>
+    <p class="fin">The End</p>`},
+  {over:true,folio:'there are no more pages',cls:'voice-4',scene:()=>'',corner:false,status:'It is just over.',note:'The real one will not have a reload button.',
+   alt:'A blank page.',
+   words:`<p class="oh">No.</p>
+    <p>That was the point of the coin. You get one flip. You flipped it, and it came up tails.</p>
+    <p>There is no reading it again. There is no better luck next time, because there is no next time. Nobody is left to turn the pages, and I have already used them.</p>
+    <p>It is just over.</p>`}
+ ]
+};
+const P = BASE.slice();
+const COIN = BASE.length-1, AUTO0 = BASE.findIndex(p=>p.auto);
+const KEEP = Object.keys(M).map(n=>{ const im=new Image(); im.src=src(n); if(im.decode) im.decode().catch(()=>{}); return im; });   /* loaded and decoded up front, so no page turns onto a blank picture */
+
+/* ---------- turning pages ---------- */
+const $ = id => document.getElementById(id);
+const book=$('book'), turnBtn=$('turn'), backBtn=$('back'), noback=$('noback'), folio=$('folio'), statusEl=$('status');
+let i=0, busy=false, timer=null, el=null;
+let locked=false;      /* true once the book starts turning its own pages: no going back */
+let outcome=null;      /* 'heads' or 'tails', decided once, on the coin page */
+const wait = ms => new Promise(r=>setTimeout(r,ms));
+
+function build(n){
+  const p=P[n], sp=document.createElement('section');
+  let s=p.scene(); if(typeof s==='string') s={back:'',scene:s};
+  sp.className='spread '+p.cls;
+  const art=`<div class="art">${s.back}<div class="scene${p.clip?' clip':''}" role="img" aria-label="${p.alt}">${s.scene}</div></div>`;
+  const corner=p.corner===false?'':`<button class="corner" type="button" tabindex="-1" aria-hidden="true"></button>`;
+  sp.innerHTML = p.cover
+    ? `<div class="leaf lp blank" aria-hidden="true"></div><div class="leaf rp"><div class="words">${p.words}</div>${art}${corner}</div>`
+    : `<div class="leaf lp"><div class="words">${p.words}</div></div><div class="leaf rp">${art}${corner}</div>`;
+  const c=sp.querySelector('.corner'); if(c) c.addEventListener('click',next);
+  return sp;
+}
+function chrome(n,auto){
+  const p=P[n];
+  let t = p.folio || `page ${p.n} &middot; written by ${p.by || 'page '+P[n-1].n}`;
+  if(p.note) t+=`<span class="note">${p.note}</span>`;
+  folio.innerHTML=t;
+  backBtn.hidden = n===0 || locked;
+  noback.hidden = !locked;
+  const hands = (p.auto && auto) || p.over;
+  turnBtn.hidden = !!hands; statusEl.hidden = !hands;
+  statusEl.textContent = p.status||'';
+  turnBtn.textContent = p.coin && !outcome ? 'Flip the coin' : (p.turn || 'Turn the page');
+  turnBtn.classList.toggle('warn',!!p.warn);
+}
+async function flip(n,dir){
+  clearTimeout(timer);
+  const old=el, nu=build(n), ms=dir>0?(P[i].flip||700):560;
+  book.classList.toggle('closed',!!P[n].cover);
+  if(RM){
+    book.appendChild(nu);
+  } else if(NARROW.matches){
+    if(dir>0){ book.insertBefore(nu,old); old.style.setProperty('--flip',ms+'ms'); old.classList.add('mo'); }
+    else { nu.style.setProperty('--flip',ms+'ms'); nu.classList.add('mi'); book.appendChild(nu); }
+    await wait(ms+30);
+  } else {
+    const q=(e,s)=>e.querySelector(s);
+    book.style.setProperty('--flip',ms+'ms');
+    if(dir>0){ q(old,'.rp').classList.add('fo'); q(nu,'.lp').classList.add('fi'); }
+    else { q(old,'.lp').classList.add('bo'); q(nu,'.rp').classList.add('bi'); }
+    book.appendChild(nu);
+    await wait(ms+30);
+    for(const l of nu.children) l.classList.remove('fi','bi');
+  }
+  old.remove(); nu.classList.remove('mi');
+  el=nu; i=n;
+  const auto = dir>0 && P[n].auto;
+  if(auto) locked=true;
+  chrome(n,auto);
+  if(auto){
+    const hold = P[n].auto*(RM?1.4:1);
+    if(P[n].lift){ el.style.setProperty('--auto',hold+'ms'); el.classList.add('lifting'); }
+    timer=setTimeout(next,hold);
+  }
+}
+async function flipCoin(){
+  const heads = crypto.getRandomValues(new Uint8Array(1))[0] < 128;      /* a fair coin, flipped once */
+  outcome = heads ? 'heads' : 'tails';
+  P.length = BASE.length; P.push(...ENDS[outcome]);
+  const coin=el.querySelector('.coin'), end=(heads?6:6.5)*360;
+  turnBtn.hidden=true; statusEl.hidden=false; statusEl.textContent='The coin is in the air.';
+  coin.style.animation='none';
+  if(RM || !coin.animate){ coin.style.transform=`rotateX(${end}deg)`; }
+  else {
+    await coin.animate([
+      {transform:'translateY(0) rotateX(0deg)',easing:'cubic-bezier(.2,.6,.4,1)'},
+      {transform:`translateY(-34%) rotateX(${end*.55}deg)`,offset:.5,easing:'cubic-bezier(.6,0,.8,.4)'},
+      {transform:`translateY(0) rotateX(${end-20}deg)`,offset:.9},
+      {transform:`translateY(-4%) rotateX(${end+6}deg)`,offset:.95},
+      {transform:`translateY(0) rotateX(${end}deg)`}
+    ],{duration:2900,fill:'forwards'}).finished.catch(()=>{});
+  }
+  const r=el.querySelector('#result');
+  r.innerHTML = heads
+    ? `${S('HEADS!')} I did not know either, you understand. Turn the page.`
+    : `<span class="tails-word">Tails.</span> Hm. Turn the page anyway. There is only the one way to go.`;
+  r.classList.remove('wait');
+  el.querySelector('.scene').setAttribute('aria-label', heads
+    ? 'The coin has landed heads: Grady’s smiling face and the words In Grady We Trust.'
+    : 'The coin has landed tails: the back of Grady’s head and the words Best of Luck.');
+  chrome(i,false);
+}
+function nudge(){
+  book.classList.remove('shake'); void book.offsetWidth; book.classList.add('shake');
+}
+async function next(){
+  if(busy) return;
+  const p=P[i];
+  if(p.over){ nudge(); return; }                      /* tails: it is just over */
+  busy=true;
+  try{
+    if(p.coin && !outcome){ await flipCoin(); return; }
+    if(p.restart){ locked=false; outcome=null; await flip(0,-1); P.length=BASE.length; return; }
+    clearTimeout(timer);
+    if(p.barrier){
+      el.querySelector('.art').classList.add('breaking');
+      await wait(RM?250:1080);
+    }
+    await flip(i+1,1);
+  } finally { busy=false; }
+}
+async function back(){
+  if(busy||i===0) return;
+  if(locked){ nudge(); return; }
+  busy=true;
+  try{ await flip(i-1,-1); } finally { busy=false; }
+}
+turnBtn.addEventListener('click',next);
+backBtn.addEventListener('click',back);
+document.addEventListener('keydown',e=>{
+  if(e.altKey||e.ctrlKey||e.metaKey) return;
+  if(e.key==='ArrowRight'||e.key==='PageDown'){e.preventDefault();next();}
+  else if(e.key==='ArrowLeft'||e.key==='PageUp'){e.preventDefault();back();}
+});
+let tx=null,ty=0;
+book.addEventListener('touchstart',e=>{tx=e.touches[0].clientX;ty=e.touches[0].clientY;},{passive:true});
+book.addEventListener('touchend',e=>{
+  if(tx===null) return;
+  const dx=e.changedTouches[0].clientX-tx, dy=e.changedTouches[0].clientY-ty; tx=null;
+  if(Math.abs(dx)>56 && Math.abs(dx)>Math.abs(dy)*1.6){ dx<0?next():back(); }
+},{passive:true});
+
+function start(data){
+  i=Math.min(Math.max((data&&data.i)|0,0),COIN);
+  locked = i>=AUTO0;
+  book.classList.toggle('closed',i===0);
+  el=build(i); book.appendChild(el); chrome(i,false);
+}
+const hot=window.claude&&window.claude.hot;
+if(hot&&hot.snapshot) hot.snapshot(()=>({i:Math.min(i,COIN)}));
+if(hot&&hot.ready) hot.ready(start); else start((hot&&hot.data)||{});
+})();
+</script>
+<!--/page-->
+</body>
+</html>

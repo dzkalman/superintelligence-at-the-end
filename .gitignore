@@ -1,0 +1,9 @@
+.DS_Store
+build/
+# raw generations are large; the character sheet is kept because every picture is drawn from it
+art/raw/*
+!art/raw/sheet.png
+art/spend.jsonl
+# brick sprites the page does not use (duplicates on the sheet)
+art/bricks13.webp
+art/bricks15.webp
