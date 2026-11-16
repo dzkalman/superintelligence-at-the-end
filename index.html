@@ -12,7 +12,8 @@
 /* Layout: an open picture book that fills the whole window, folded down the middle. Words
    on the left page, Grady on the right; the right-hand leaf turns over the fold, and the
    controls sit on the pages like a folio line. Type and pictures scale with the window.
-   (On a phone held upright there is room for one page, so the picture sits above the words.) The pages
+   (In a tall window, such as a phone held upright, the fold runs across the middle instead:
+   words on the top page, picture on the bottom, and the bottom leaf flips up.) The pages
    are always printed paper; only the desk behind the closed cover follows the theme. */
 :root{
   --desk:#E4DCF7; --desk-2:#D3C7F0;
@@ -24,6 +25,7 @@
   --f-shout:'Chewy','Arial Rounded MT Bold','Trebuchet MS',system-ui,sans-serif;
   --f-kid:'Patrick Hand','Comic Sans MS','Chalkboard SE',cursive;
   --f-grown:'Fraunces',Georgia,'Times New Roman',serif;
+  --lift:210px;
   --bar:clamp(40px,8vh,60px);      /* room kept at the foot of each page for the controls */
   --grain:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .38  0 0 0 0 .3  0 0 0 0 .18  0 0 0 .11 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
 }
@@ -42,7 +44,7 @@
 
 *{box-sizing:border-box}
 [hidden]{display:none!important}
-html,body{height:100%}
+html,body{height:100%;overscroll-behavior:none}
 body{
   margin:0;
   background:radial-gradient(120% 80% at 50% 0%,var(--desk-2),var(--desk) 60%) var(--desk);
@@ -68,7 +70,7 @@ body{
   overflow:hidden;
   backface-visibility:hidden;-webkit-backface-visibility:hidden;
 }
-.lp{--fold:linear-gradient(to left,rgba(70,45,10,.32),rgba(70,45,10,.10) 3.5%,transparent 15%);transform-origin:right center;padding-left:env(safe-area-inset-left,0px)}
+.lp{--fold:linear-gradient(to left,rgba(70,45,10,.32),rgba(70,45,10,.10) 3.5%,transparent 15%);transform-origin:right center;padding-left:env(safe-area-inset-left,0px);padding-bottom:var(--bar)}
 .rp{--fold:linear-gradient(to right,rgba(70,45,10,.32),rgba(70,45,10,.10) 3.5%,transparent 15%);transform-origin:left center;padding-right:env(safe-area-inset-right,0px)}
 .lp.blank{visibility:hidden}
 /* the closed book: one board, a foil spine of little loops down its left edge */
@@ -91,25 +93,26 @@ body{
 @keyframes lpOut{from{transform:perspective(3200px) rotateY(0deg)}to{transform:perspective(3200px) rotateY(180deg)}}
 @keyframes rpIn{from{transform:perspective(3200px) rotateY(-180deg)}to{transform:perspective(3200px) rotateY(0deg)}}
 @keyframes shade{50%{filter:brightness(.74)}}
-/* phone: the whole page turns from its left edge */
-.spread.mo{position:relative;z-index:5;transform-origin:left center;animation:turnOut var(--flip,650ms) cubic-bezier(.5,.05,.8,.45) forwards}
-.spread.mi{position:relative;z-index:5;transform-origin:left center;animation:turnIn var(--flip,650ms) cubic-bezier(.15,.6,.35,1) both}
-@keyframes turnOut{to{transform:perspective(2400px) rotateY(-94deg);filter:brightness(.72)}}
-@keyframes turnIn{from{transform:perspective(2400px) rotateY(-94deg);filter:brightness(.72)}}
+/* a tall window: the same turn, over a fold that runs across the middle */
+@keyframes rpOutV{from{transform:perspective(3200px) rotateX(0deg)}to{transform:perspective(3200px) rotateX(180deg)}}
+@keyframes lpInV{from{transform:perspective(3200px) rotateX(-180deg)}to{transform:perspective(3200px) rotateX(0deg)}}
+@keyframes lpOutV{from{transform:perspective(3200px) rotateX(0deg)}to{transform:perspective(3200px) rotateX(-180deg)}}
+@keyframes rpInV{from{transform:perspective(3200px) rotateX(180deg)}to{transform:perspective(3200px) rotateX(0deg)}}
 
 /* ---------- words: sized from the page, by whichever of its width or height is tighter ---------- */
 .words{
   flex:1;min-width:0;min-height:0;position:relative;z-index:2;
   display:flex;flex-direction:column;justify-content:safe center;gap:.8em;
-  padding:clamp(20px,8.5cqi,90px);padding-bottom:calc(var(--bar) + 6px);
-  overflow-y:auto;
+  padding:clamp(20px,8.5cqi,90px);padding-bottom:10px;
+  overflow-y:auto;scrollbar-width:thin;
+  -webkit-mask-image:linear-gradient(to bottom,#000 calc(100% - 10px),transparent);mask-image:linear-gradient(to bottom,#000 calc(100% - 10px),transparent);
 }
 .words p{margin:0;text-wrap:pretty}
-.voice-1 .words{font-family:var(--f-kid);font-size:min(4.6cqi,5.2cqh);line-height:1.28}
-.voice-2 .words{font-family:var(--f-kid);font-size:min(4.2cqi,4.4cqh);line-height:1.3}
-.voice-3 .words{font-family:var(--f-grown);font-weight:500;font-size:min(3.55cqi,3.25cqh);line-height:1.45}
-.voice-4 .words{font-family:var(--f-grown);font-weight:400;font-size:min(3.4cqi,2.95cqh);line-height:1.58}
-.coinpage .words{font-size:min(3.4cqi,2.62cqh);gap:.7em}
+.voice-1 .words{font-family:var(--f-kid);font-size:min(4.6cqi,5.6cqh);line-height:1.28}
+.voice-2 .words{font-family:var(--f-kid);font-size:min(4.2cqi,4.75cqh);line-height:1.3}
+.voice-3 .words{font-family:var(--f-grown);font-weight:500;font-size:min(3.55cqi,3.5cqh);line-height:1.45}
+.voice-4 .words{font-family:var(--f-grown);font-weight:400;font-size:min(3.4cqi,3.2cqh);line-height:1.58}
+.coinpage .words{font-size:min(3.4cqi,2.85cqh);gap:.7em}
 
 /* hand-lettered display words: fat marker fill inside a wobbly ink outline */
 .shout,.cover h1 span{
@@ -139,7 +142,7 @@ body{
 .tails-word{font-size:1.9em;font-weight:300;font-style:italic;line-height:1}
 
 /* cover */
-.cover .words{flex:none;justify-content:flex-start;gap:.3em;overflow:visible;font-size:min(4.4cqi,3.3cqh);padding:1.9em 1.9em 0}
+.cover .words{flex:none;justify-content:flex-start;gap:.3em;overflow:visible;-webkit-mask-image:none;mask-image:none;font-size:min(4.4cqi,3.3cqh);padding:1.9em 1.9em 0}
 .eyebrow{font-family:var(--f-grown);font-style:italic;font-weight:500;font-size:.72em;letter-spacing:.02em}
 .cover h1{font-size:1.45em;line-height:1.08;margin:0;font-weight:400}
 .cover h1 span{display:inline-block;letter-spacing:.03em}
@@ -185,8 +188,8 @@ body{
   transition:width .2s ease,height .2s ease;
 }
 .corner:hover{width:calc(var(--bar) + 22px);height:calc(var(--bar) + 22px)}
-.lifting .corner{animation:lift var(--auto,6s) cubic-bezier(.6,0,.9,.4) forwards}
-@keyframes lift{to{width:210px;height:210px}}
+.lifting .corner{animation:lift var(--auto,6s) cubic-bezier(.3,0,.75,.55) forwards}
+@keyframes lift{to{width:var(--lift);height:var(--lift)}}
 
 /* ---------- controls: printed at the foot of the pages ---------- */
 .controls{
@@ -226,40 +229,44 @@ body{
 .controls.closed .c-left{display:none}
 .controls.closed .c-right{justify-content:center;padding:0 16px}
 
-/* a phone held upright: one page at a time */
-@media (max-width:720px) and (orientation:portrait){
-  :root{--bar:104px}
-  html,body{height:auto}
-  .stage{height:auto;overflow:visible}
-  .book{height:auto}
-  .book.closed{transform:none}
-  .spread{grid-template-columns:minmax(0,1fr);grid-template-rows:auto 1fr;min-height:100svh}
-  .leaf{container-type:inline-size}
-  .lp,.rp{--fold:linear-gradient(to right,rgba(70,45,10,.26),rgba(70,45,10,.08) 3%,transparent 9%);padding-inline:0}
-  .rp{order:-1;height:min(42svh,88vw)}
-  .lp.blank{display:none}
-  .cover{grid-template-rows:1fr}
-  .cover .rp{height:auto;min-height:100svh;padding-left:16px;box-shadow:none}
-  .cover .rp::before{width:16px;background-size:16px 18px,auto}
-  .cover .rp::after{inset:0 0 0 16px;border-width:9px}
-  .cover .words{font-size:4.6cqi;padding:1.7em 1.5em 0}
-  .cover .t-big{font-size:1.3em}
-  .art{padding:16px 14px 0}
-  .cover .art{padding-bottom:calc(var(--bar) - 16px)}
-  .backdrop{-webkit-mask-image:linear-gradient(to top,transparent,#000 12%);mask-image:linear-gradient(to top,transparent,#000 12%)}
-  .words{padding:16px 22px calc(var(--bar) + 10px);justify-content:flex-start;overflow:visible}
-  .voice-1 .words,.voice-2 .words{font-size:1.32rem}
-  .voice-3 .words,.voice-4 .words,.coinpage .words{font-size:1.1rem}
-  .rp .corner{display:none}
-  .tile.edge{-webkit-mask-image:none;mask-image:none}
-  .controls{grid-template-columns:1fr;grid-template-rows:auto auto;align-content:end;padding-bottom:12px;row-gap:4px}
-  .controls,.controls.closed{font-size:16px}
-  .c-left{padding:0 18px}
-  .c-left>span{display:none}
-  .folio{text-align:right;font-size:.86em}
+/* A tall window (a phone held upright): the book lies on its side. The fold runs across the
+   middle, the words are on the top page and the picture on the bottom page, and the bottom
+   leaf flips up over the fold. */
+@media (max-aspect-ratio:9/10){
+  :root{--bar:clamp(44px,7vh,62px);--bar-s:clamp(28px,4.4vh,40px);--lift:min(42vw,210px)}
+  .book.closed{transform:translateY(-25%)}
+  .spread{grid-template-columns:minmax(0,1fr);grid-template-rows:minmax(0,1fr) minmax(0,1fr)}
+  .lp{--fold:linear-gradient(to top,rgba(70,45,10,.32),rgba(70,45,10,.10) 3.5%,transparent 15%);transform-origin:center bottom;padding-left:0;padding-bottom:var(--bar-s)}
+  .rp{--fold:linear-gradient(to bottom,rgba(70,45,10,.32),rgba(70,45,10,.10) 3.5%,transparent 15%);transform-origin:center top;padding-right:0}
+  .leaf.fo{animation-name:rpOutV,shade} .leaf.fi{animation-name:lpInV,shade}
+  .leaf.bo{animation-name:lpOutV,shade} .leaf.bi{animation-name:rpInV,shade}
+  /* the closed book: its spine is along the top */
+  .cover .rp{padding-left:0;padding-top:16px}
+  .cover .rp::before{inset:0 0 auto 0;width:auto;height:16px;background-size:20px 16px,auto;background-image:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='22' height='24' viewBox='0 0 22 24'%3E%3Cpath d='M15.5 9.5a5 5 0 1 0 .6 5' fill='none' stroke='%23B98516' stroke-width='1.6' stroke-linecap='round'/%3E%3Cpath d='M13 8.2l3 1.6 1.2-3.2' fill='none' stroke='%23B98516' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"),
+    linear-gradient(180deg,var(--gold-deep),var(--gold) 28%,var(--gold) 72%,var(--gold-deep))}
+  .cover .rp::after{inset:16px 0 0 0;border-width:9px}
+  .cover .words{padding:1.5em 1.7em 0}
+  .cover .art{padding-bottom:14px}
+  .words{padding:5cqi 5.5cqi 10px;gap:.62em}
+  .voice-1 .words{font-size:max(15px,min(5.4cqi,6cqh))}
+  .voice-2 .words{font-size:max(15px,min(5cqi,5.2cqh))}
+  .voice-3 .words{font-size:max(13px,min(4cqi,3.75cqh))}
+  .voice-4 .words{font-size:max(13px,min(3.9cqi,3.6cqh))}
+  .coinpage .words{font-size:max(12.5px,min(3.9cqi,3cqh))}
+  .coinpage .cite{order:1} .coinpage .result{order:2}      /* the source stays in view; the result scrolls in under it */
+  .art{padding:clamp(6px,2.4cqi,30px);padding-bottom:var(--bar)}
+  /* the folio at the foot of the top page, the button at the foot of the bottom page */
+  .controls{inset:0;height:auto;display:block;font-size:clamp(12px,1.5vh + .6vw,19px)}
+  .c-left{position:absolute;left:0;right:0;bottom:50%;height:var(--bar-s);padding:0 5.5vw}
+  .c-right{position:absolute;left:0;right:0;bottom:env(safe-area-inset-bottom,0px);height:var(--bar);padding:0 calc(var(--bar) + 12px) 0 14px}
+  .folio{text-align:right}
   .noback s{display:none}
-  .c-right{padding:0 18px}
-  .controls.closed{height:var(--bar)}
+  .note{font-size:.9em;max-width:9.5em}
+  .controls.closed{height:auto;font-size:clamp(14px,1.7vh + .7vw,22px)}
+  /* the closed book leaves the desk showing above and below it: the button sits on the desk */
+  .controls.closed .c-right{bottom:calc(25% - var(--bar) - 22px);height:var(--bar);justify-content:center;padding:0 16px}
+  .controls.closed .turn{background:var(--paper);color:var(--ink);box-shadow:0 6px 18px -6px rgba(0,0,0,.5)}
 }
 @media (prefers-reduced-motion:reduce){
   .book,.controls{transition:none}
@@ -300,7 +307,7 @@ body{
 (()=>{
 'use strict';
 const RM = matchMedia('(prefers-reduced-motion: reduce)').matches;
-const NARROW = matchMedia('(max-width:720px) and (orientation:portrait)');
+const TALL = matchMedia('(max-aspect-ratio:9/10)');      /* fold across the middle: swipe up and down */
 const f = n => (+n).toFixed(1);
 const rng = seed => { let s = seed>>>0; return () => ((s = (Math.imul(s,1664525)+1013904223)>>>0)/4294967296); };
 
@@ -540,10 +547,6 @@ async function flip(n,dir){
   stage.classList.add('turning');
   if(RM){
     book.appendChild(nu);
-  } else if(NARROW.matches){
-    if(dir>0){ book.insertBefore(nu,old); old.style.setProperty('--flip',ms+'ms'); old.classList.add('mo'); }
-    else { nu.style.setProperty('--flip',ms+'ms'); nu.classList.add('mi'); book.appendChild(nu); }
-    await wait(ms+30);
   } else {
     const q=(e,s)=>e.querySelector(s);
     book.style.setProperty('--flip',ms+'ms');
@@ -553,7 +556,7 @@ async function flip(n,dir){
     await wait(ms+30);
     for(const l of nu.children) l.classList.remove('fi','bi');
   }
-  old.remove(); nu.classList.remove('mi');
+  old.remove();
   el=nu; i=n;
   const auto = dir>0 && P[n].auto;
   if(auto) locked=true;
@@ -587,6 +590,8 @@ async function flipCoin(){
     ? `${S('HEADS!')} I did not know either, you understand. Turn the page.`
     : `<span class="tails-word">Tails.</span> Hm. Turn the page anyway. There is only the one way to go.`;
   r.classList.remove('wait');
+  const box=r.closest('.words');
+  if(box.scrollHeight>box.clientHeight+2) box.scrollTo({top:r.offsetTop+r.offsetHeight-box.clientHeight+12,behavior:RM?'auto':'smooth'});
   el.querySelector('.scene').setAttribute('aria-label', heads
     ? 'The coin has landed heads: Grady’s smiling face and the words In Grady We Trust.'
     : 'The coin has landed tails: the back of Grady’s head and the words Best of Luck.');
@@ -629,7 +634,11 @@ book.addEventListener('touchstart',e=>{tx=e.touches[0].clientX;ty=e.touches[0].c
 book.addEventListener('touchend',e=>{
   if(tx===null) return;
   const dx=e.changedTouches[0].clientX-tx, dy=e.changedTouches[0].clientY-ty; tx=null;
-  if(Math.abs(dx)>56 && Math.abs(dx)>Math.abs(dy)*1.6){ dx<0?next():back(); }
+  const w=e.target.closest&&e.target.closest('.words');
+  if(TALL.matches){
+    if(w && w.scrollHeight>w.clientHeight+2) return;        /* that drag was reading, not turning */
+    if(Math.abs(dy)>56 && Math.abs(dy)>Math.abs(dx)*1.6){ dy<0?next():back(); }
+  } else if(Math.abs(dx)>56 && Math.abs(dx)>Math.abs(dy)*1.6){ dx<0?next():back(); }
 },{passive:true});
 
 function start(data){
